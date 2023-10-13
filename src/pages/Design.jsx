@@ -1,5 +1,7 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+	Alert,
+	Button,
 	Grid,
 	Link,
 	MenuItem,
@@ -14,12 +16,14 @@ import { getConfiguration } from '../api/configuration.api';
 export default function Design() {
 	// State
 	const [config, setConfig] = useState();
-	const [options, setOptions] = useState([]);
+	const [defaultOptions, setDefaultOptions] = useState([]);
+	const [filteredOptions, setFilteredOptions] = useState([]);
 	const [variant, setVariant] = useState({});
 
 	useEffect(() => {
 		getCharacteristics().then((response) => {
-			setOptions(response.characteristics);
+			setDefaultOptions(response.characteristics);
+			setFilteredOptions(response.characteristics);
 			let v = {};
 			response.characteristics.forEach((characteristic) => {
 				v[characteristic.key] = '';
@@ -32,28 +36,41 @@ export default function Design() {
 		});
 	}, []);
 
-	const handleCharacteristicChange = (characteristic, value) => {
+	const resetVariant = () => {
+		let v = {};
+		defaultOptions.forEach((characteristic) => {
+			v[characteristic.key] = '';
+		});
+		setVariant(v);
+	};
+
+	const handleCharacteristicChange = (characteristic, event) => {
 		//Update the Variant
 		let v = { ...variant };
-		v[characteristic.key] = value;
+		v[characteristic.key] = event.target.value;
 		setVariant(v);
+
 		// Update Options
 		let rules = config.filter((c) => {
-			return c.keyOne === characteristic.key && c.valueOne === value;
+			return (
+				c.keyOne === characteristic.key &&
+				c.valueOne === event.target.value
+			);
 		});
 		if (rules.length) {
-			let wipOptions = [...options];
+			let wipOptions = [...defaultOptions];
 			rules.forEach((rule) => {
 				console.log(rule);
 				wipOptions.find((option) => {
 					return option.key === rule.keyTwo;
 				}).allowedValues = rule.allowedValues;
 			});
+			setFilteredOptions(wipOptions);
 		}
 	};
 
 	const form = () => {
-		var fields = options.map((c) => {
+		var fields = filteredOptions.map((c) => {
 			if (c.allowedValues) {
 				return selectField(c);
 			} else {
@@ -83,11 +100,9 @@ export default function Design() {
 					label={characteristic.description}
 					value={variant[characteristic.key] || ''}
 					fullWidth
+					disabled={variant[characteristic.key] !== ''}
 					onChange={(e) =>
-						handleCharacteristicChange(
-							characteristic,
-							e.target.value
-						)
+						handleCharacteristicChange(characteristic, e)
 					}
 				>
 					{options}
@@ -103,10 +118,7 @@ export default function Design() {
 					label={characteristic.description}
 					fullWidth
 					onChange={(e) =>
-						handleCharacteristicChange(
-							characteristic,
-							e.target.value
-						)
+						handleCharacteristicChange(characteristic, e)
 					}
 				/>
 			</Grid>
@@ -123,8 +135,20 @@ export default function Design() {
 				KMAT Variant Design-inator
 			</Typography>
 			{form()}
+			<div style={{ textAlign: 'center' }}>
+				<Button
+					onClick={() => {
+						resetVariant();
+					}}
+				>
+					Reset
+				</Button>
+			</div>
+
 			<hr />
-			<pre>{JSON.stringify(variant, null, 2)}</pre>
+			<Alert>
+				<pre>{JSON.stringify(variant, null, 2)}</pre>
+			</Alert>
 		</>
 	);
 }
