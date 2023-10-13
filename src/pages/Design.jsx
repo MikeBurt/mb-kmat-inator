@@ -7,29 +7,49 @@ import {
 	TextField,
 	Typography,
 } from '@octanner/prism-core';
-import CharacteristicsContext from '../services/characteristicsContext';
+
+import { getCharacteristics } from '../api/characteristics.api';
+import { getConfiguration } from '../api/configuration.api';
 
 export default function Design() {
-	// Context
-	const characteristicsContext = useContext(CharacteristicsContext);
-
 	// State
-	const [options] = useState(characteristicsContext.characteristics);
+	const [config, setConfig] = useState();
+	const [options, setOptions] = useState([]);
 	const [variant, setVariant] = useState({});
 
 	useEffect(() => {
-		let v = {};
-		characteristicsContext.characteristics.forEach((characteristic) => {
-			v[characteristic.key] = '';
+		getCharacteristics().then((response) => {
+			setOptions(response.characteristics);
+			let v = {};
+			response.characteristics.forEach((characteristic) => {
+				v[characteristic.key] = '';
+			});
+			setVariant(v);
 		});
-		setVariant(v);
+
+		getConfiguration().then((response) => {
+			setConfig(response.configuration);
+		});
 	}, []);
 
-	const handleCharacteristicChange = (characteristic, event) => {
+	const handleCharacteristicChange = (characteristic, value) => {
 		//Update the Variant
 		let v = { ...variant };
-		v[characteristic.key] = event.target.value;
+		v[characteristic.key] = value;
 		setVariant(v);
+		// Update Options
+		let rules = config.filter((c) => {
+			return c.keyOne === characteristic.key && c.valueOne === value;
+		});
+		if (rules.length) {
+			let wipOptions = [...options];
+			rules.forEach((rule) => {
+				console.log(rule);
+				wipOptions.find((option) => {
+					return option.key === rule.keyTwo;
+				}).allowedValues = rule.allowedValues;
+			});
+		}
 	};
 
 	const form = () => {
@@ -64,7 +84,10 @@ export default function Design() {
 					value={variant[characteristic.key] || ''}
 					fullWidth
 					onChange={(e) =>
-						handleCharacteristicChange(characteristic, e)
+						handleCharacteristicChange(
+							characteristic,
+							e.target.value
+						)
 					}
 				>
 					{options}
@@ -80,7 +103,10 @@ export default function Design() {
 					label={characteristic.description}
 					fullWidth
 					onChange={(e) =>
-						handleCharacteristicChange(characteristic, e)
+						handleCharacteristicChange(
+							characteristic,
+							e.target.value
+						)
 					}
 				/>
 			</Grid>
