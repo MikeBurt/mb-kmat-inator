@@ -22,8 +22,13 @@ export default function Design() {
 
 	useEffect(() => {
 		getCharacteristics().then((response) => {
-			setDefaultOptions(response.characteristics);
-			setFilteredOptions(response.characteristics);
+			setDefaultOptions(
+				JSON.parse(JSON.stringify(response.characteristics))
+			);
+			setFilteredOptions(
+				JSON.parse(JSON.stringify(response.characteristics))
+			);
+
 			let v = {};
 			response.characteristics.forEach((characteristic) => {
 				v[characteristic.key] = '';
@@ -46,27 +51,50 @@ export default function Design() {
 
 	const handleCharacteristicChange = (characteristic, event) => {
 		//Update the Variant
-		let v = { ...variant };
-		v[characteristic.key] = event.target.value;
-		setVariant(v);
+		let variantCopy = { ...variant };
+		variantCopy[characteristic.key] = event.target.value;
 
 		// Update Options
-		let rules = config.filter((c) => {
-			return (
-				c.keyOne === characteristic.key &&
-				c.valueOne === event.target.value
-			);
-		});
-		if (rules.length) {
-			let wipOptions = [...defaultOptions];
-			rules.forEach((rule) => {
-				console.log(rule);
-				wipOptions.find((option) => {
-					return option.key === rule.keyTwo;
-				}).allowedValues = rule.allowedValues;
+		let optionsCopy = JSON.parse(JSON.stringify(defaultOptions));
+		for (const key in variantCopy) {
+			let filteredConfig = config.filter((rec) => {
+				return rec.key === key && rec.value === variantCopy[key];
 			});
-			setFilteredOptions(wipOptions);
+
+			if (filteredConfig.length) {
+				filteredConfig.forEach((item) => {
+					item.dependencies.forEach((dependency) => {
+						if (dependency.type === 'include') {
+							dependency.criteria.forEach((c) => {
+								optionsCopy.find((option) => {
+									return option.key === c.key;
+								}).allowedValues = c.values;
+							});
+						}
+						if (dependency.type === 'exclude') {
+							dependency.criteria.forEach((c) => {
+								c.values.forEach((value) => {
+									let newValues = optionsCopy
+										.find((option) => {
+											return option.key === c.key;
+										})
+										.allowedValues.filter((allowed) => {
+											return allowed !== value;
+										});
+
+									optionsCopy.find((option) => {
+										return option.key === c.key;
+									}).allowedValues = newValues;
+								});
+							});
+						}
+					});
+				});
+			}
 		}
+
+		setVariant(variantCopy);
+		setFilteredOptions(optionsCopy);
 	};
 
 	const form = () => {
@@ -100,7 +128,6 @@ export default function Design() {
 					label={characteristic.description}
 					value={variant[characteristic.key] || ''}
 					fullWidth
-					disabled={variant[characteristic.key] !== ''}
 					onChange={(e) =>
 						handleCharacteristicChange(characteristic, e)
 					}

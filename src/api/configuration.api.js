@@ -3,20 +3,63 @@ export const getConfiguration = async () => {
 		configuration: [
 			// Material 'Aluminum' allows Shapes 'One', 'Five', & 'Ten'
 			{
-				keyOne: 'MTRL',
-				valueOne: 'Aluminum',
-				keyTwo: 'SHP',
-				allowedValues: ['One', 'Five', 'Ten'],
+				key: 'MTRL',
+				value: 'Aluminum',
+				dependencies: [
+					{
+						type: 'include',
+						criteria: [
+							{
+								key: 'SHP',
+								values: ['One', 'Five', 'Ten'],
+							},
+						],
+					},
+				],
 			},
-			// Material 'Wood' only allows Font 'Arial'
+			// Material 'Wood' allows Font 'Arial'
 			{
-				keyOne: 'MTRL',
-				valueOne: 'Wood',
-				keyTwo: 'FNT',
-				allowedValues: ['Arial'],
+				key: 'MTRL',
+				value: 'Wood',
+				dependencies: [
+					{
+						type: 'include',
+						criteria: [
+							{
+								key: 'FNT',
+								values: ['Arial'],
+							},
+						],
+					},
+				],
 			},
 			// Material 'Concrete' allows all 'Shape' EXCEPT 'Ten'
+			{
+				key: 'MTRL',
+				value: 'Concrete',
+				dependencies: [
+					{
+						type: 'exclude',
+						criteria: [
+							{
+								key: 'SHP',
+								values: ['Ten'],
+							},
+						],
+					},
+				],
+			},
 			// Font 'Times New Roman' is only allowed on Aluminum Circles
+			{
+				key: 'FNT',
+				value: 'Times New Roman',
+				dependencies: [
+					{
+						type: 'allowedIf',
+						criteria: [{ MTRL: ['Aluminum'] }, { SHP: 'Circle' }],
+					},
+				],
+			},
 		],
 	};
 };
