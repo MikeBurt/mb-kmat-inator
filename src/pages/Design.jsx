@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, Button, Grid, Link, MenuItem, Select, TextField, Typography } from '@octanner/prism-core';
-
 import { getCharacteristics } from '../api/characteristics.api';
 import { getConfiguration } from '../api/configuration.api';
 
@@ -13,7 +12,6 @@ export default function Design() {
 
 	useEffect(() => {
 		let variantCopy = {};
-
 		getCharacteristics().then((response) => {
 			setDefaultOptions(JSON.parse(JSON.stringify(response.characteristics)));
 			setFilteredOptions(JSON.parse(JSON.stringify(response.characteristics)));
@@ -33,18 +31,18 @@ export default function Design() {
 		updateOptions();
 	}, [config, variant]);
 
+	const handleCharacteristicChange = (characteristic, event) => {
+		let variantCopy = { ...variant };
+		variantCopy[characteristic.key] = event.target.value;
+		setVariant(variantCopy);
+	};
+
 	const resetVariant = () => {
 		let v = {};
 		defaultOptions.forEach((characteristic) => {
 			v[characteristic.key] = '';
 		});
 		setVariant(v);
-	};
-
-	const handleCharacteristicChange = (characteristic, event) => {
-		let variantCopy = { ...variant };
-		variantCopy[characteristic.key] = event.target.value;
-		setVariant(variantCopy);
 	};
 
 	const updateOptions = () => {
@@ -65,6 +63,14 @@ export default function Design() {
 								optionsCopy.find((option) => {
 									return option.key === c.key;
 								}).allowedValues = c.values;
+
+								if (c.values.length === 1) {
+									let key = optionsCopy.find((option) => {
+										return option.key === c.key;
+									}).key;
+									variantCopy[key] = c.values[0];
+									setVariant(variantCopy);
+								}
 							});
 						}
 						if (dependency.type === 'exclude') {
@@ -89,24 +95,24 @@ export default function Design() {
 			}
 		}
 
-		configCopy.forEach((c) => {
-			c.dependencies.forEach((dep) => {
-				if (dep.type === 'allowedIf') {
+		configCopy.forEach((config) => {
+			config.dependencies.forEach((dependency) => {
+				if (dependency.type === 'allowedIf') {
 					let allowed = true;
-					dep.criteria.forEach((rec) => {
+					dependency.criteria.forEach((rec) => {
 						allowed = rec.values.includes(variantCopy[rec.key]) && allowed;
 					});
 					if (!allowed) {
 						let newValues = optionsCopy
 							.find((option) => {
-								return option.key === c.key;
+								return option.key === config.key;
 							})
 							.allowedValues.filter((allowedValue) => {
-								return allowedValue !== c.value;
+								return allowedValue !== config.value;
 							});
 
 						optionsCopy.find((option) => {
-							return option.key === c.key;
+							return option.key === config.key;
 						}).allowedValues = newValues;
 					}
 				}
@@ -116,6 +122,7 @@ export default function Design() {
 		setFilteredOptions(optionsCopy);
 	};
 
+	// Components
 	const form = () => {
 		var fields = filteredOptions.map((c) => {
 			if (c.allowedValues) {
