@@ -49,14 +49,17 @@ export const getConfiguration = async () => {
 					},
 				],
 			},
-			// Font 'Times New Roman' is only allowed on Aluminum Circles
+			// Font 'Times New Roman' is only allowed on Aluminum One
 			{
 				key: 'FNT',
 				value: 'Times New Roman',
 				dependencies: [
 					{
 						type: 'allowedIf',
-						criteria: [{ MTRL: ['Aluminum'] }, { SHP: 'Circle' }],
+						criteria: [
+							{ key: 'MTRL', values: ['Aluminum'] },
+							{ key: 'SHP', values: ['One'] },
+						],
 					},
 				],
 			},

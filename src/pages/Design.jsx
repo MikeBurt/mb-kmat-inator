@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-	Alert,
-	Button,
-	Grid,
-	Link,
-	MenuItem,
-	Select,
-	TextField,
-	Typography,
-} from '@octanner/prism-core';
+import { Alert, Button, Grid, Link, MenuItem, Select, TextField, Typography } from '@octanner/prism-core';
 
 import { getCharacteristics } from '../api/characteristics.api';
 import { getConfiguration } from '../api/configuration.api';
@@ -21,25 +12,26 @@ export default function Design() {
 	const [variant, setVariant] = useState({});
 
 	useEffect(() => {
-		getCharacteristics().then((response) => {
-			setDefaultOptions(
-				JSON.parse(JSON.stringify(response.characteristics))
-			);
-			setFilteredOptions(
-				JSON.parse(JSON.stringify(response.characteristics))
-			);
+		let variantCopy = {};
 
-			let v = {};
+		getCharacteristics().then((response) => {
+			setDefaultOptions(JSON.parse(JSON.stringify(response.characteristics)));
+			setFilteredOptions(JSON.parse(JSON.stringify(response.characteristics)));
+
 			response.characteristics.forEach((characteristic) => {
-				v[characteristic.key] = '';
+				variantCopy[characteristic.key] = '';
 			});
-			setVariant(v);
+			setVariant(variantCopy);
 		});
 
 		getConfiguration().then((response) => {
 			setConfig(response.configuration);
 		});
 	}, []);
+
+	useEffect(() => {
+		updateOptions();
+	}, [config, variant]);
 
 	const resetVariant = () => {
 		let v = {};
@@ -50,14 +42,18 @@ export default function Design() {
 	};
 
 	const handleCharacteristicChange = (characteristic, event) => {
-		//Update the Variant
 		let variantCopy = { ...variant };
 		variantCopy[characteristic.key] = event.target.value;
+		setVariant(variantCopy);
+	};
 
-		// Update Options
-		let optionsCopy = JSON.parse(JSON.stringify(defaultOptions));
+	const updateOptions = () => {
+		let configCopy = JSON.parse(JSON.stringify(config || []));
+		let optionsCopy = JSON.parse(JSON.stringify(defaultOptions || []));
+		let variantCopy = JSON.parse(JSON.stringify(variant || []));
+
 		for (const key in variantCopy) {
-			let filteredConfig = config.filter((rec) => {
+			let filteredConfig = configCopy.filter((rec) => {
 				return rec.key === key && rec.value === variantCopy[key];
 			});
 
@@ -93,7 +89,30 @@ export default function Design() {
 			}
 		}
 
-		setVariant(variantCopy);
+		configCopy.forEach((c) => {
+			c.dependencies.forEach((dep) => {
+				if (dep.type === 'allowedIf') {
+					let allowed = true;
+					dep.criteria.forEach((rec) => {
+						allowed = rec.values.includes(variantCopy[rec.key]) && allowed;
+					});
+					if (!allowed) {
+						let newValues = optionsCopy
+							.find((option) => {
+								return option.key === c.key;
+							})
+							.allowedValues.filter((allowedValue) => {
+								return allowedValue !== c.value;
+							});
+
+						optionsCopy.find((option) => {
+							return option.key === c.key;
+						}).allowedValues = newValues;
+					}
+				}
+			});
+		});
+
 		setFilteredOptions(optionsCopy);
 	};
 
@@ -124,14 +143,7 @@ export default function Design() {
 
 		return (
 			<Grid key={characteristic.key} item xs={4}>
-				<Select
-					label={characteristic.description}
-					value={variant[characteristic.key] || ''}
-					fullWidth
-					onChange={(e) =>
-						handleCharacteristicChange(characteristic, e)
-					}
-				>
+				<Select label={characteristic.description} value={variant[characteristic.key] || ''} fullWidth onChange={(e) => handleCharacteristicChange(characteristic, e)}>
 					{options}
 				</Select>
 			</Grid>
@@ -141,24 +153,18 @@ export default function Design() {
 	const textField = (characteristic) => {
 		return (
 			<Grid key={characteristic.key} item xs={6}>
-				<TextField
-					label={characteristic.description}
-					fullWidth
-					onChange={(e) =>
-						handleCharacteristicChange(characteristic, e)
-					}
-				/>
+				<TextField label={characteristic.description} fullWidth onChange={(e) => handleCharacteristicChange(characteristic, e)} />
 			</Grid>
 		);
 	};
 
 	return (
 		<>
-			<Link href='/' variant='button'>
+			<Link href="/" variant="button">
 				Home
 			</Link>
 			<hr />
-			<Typography variant='h2' component='h2' gutterBottom>
+			<Typography variant="h2" component="h2" gutterBottom>
 				KMAT Variant Design-inator
 			</Typography>
 			{form()}
