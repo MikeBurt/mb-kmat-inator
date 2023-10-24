@@ -18,6 +18,7 @@ export default function Design() {
 	const [defaultOptions, setDefaultOptions] = useState([]);
 	const [filteredOptions, setFilteredOptions] = useState([]);
 	const [variant, setVariant] = useState({});
+	const [variantDraft, setVariantDraft] = useState(false);
 
 	useEffect(() => {
 		let variantCopy = {};
@@ -37,10 +38,13 @@ export default function Design() {
 	}, []);
 
 	useEffect(() => {
-		updateOptions();
+		if (variantDraft) {
+			updateOptions();
+		}
 	}, [config, variant]);
 
 	const handleCharacteristicChange = (characteristic, event) => {
+		setVariantDraft(true);
 		let variantCopy = { ...variant };
 		variantCopy[characteristic.key] = event.target.value;
 		setVariant(variantCopy);
@@ -55,6 +59,7 @@ export default function Design() {
 	};
 
 	const updateOptions = () => {
+		setVariantDraft(false);
 		let configCopy = JSON.parse(JSON.stringify(config || []));
 		let optionsCopy = JSON.parse(JSON.stringify(defaultOptions || []));
 		let variantCopy = JSON.parse(JSON.stringify(variant || []));
@@ -79,18 +84,13 @@ export default function Design() {
 									return option.key === c.key;
 								}).allowedValues = newValues;
 
-								//-------------------------------------------------
-								// Auto-Set option if only one option is available
-								//     (Causes infinite-loop in current state)
-								//-------------------------------------------------
-
-								// if (newValues.length === 1) {
-								// 	let key = optionsCopy.find((o) => {
-								// 		return o.key === c.key;
-								// 	}).key;
-								// 	variantCopy[key] = c.values[0];
-								// 	setVariant(variantCopy);
-								// }
+								if (newValues.length === 1) {
+									let key = optionsCopy.find((o) => {
+										return o.key === c.key;
+									}).key;
+									variantCopy[key] = c.values[0];
+									setVariant(variantCopy);
+								}
 							});
 						}
 						if (dependency.type === 'exclude') {
