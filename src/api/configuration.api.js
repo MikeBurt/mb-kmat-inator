@@ -1,64 +1,66 @@
 export const getConfiguration = async () => {
 	return {
 		configuration: [
-			// Material 'Aluminum' allows Shapes 'One', 'Five', & 'Ten'
+			// Material 'ACRYLIC' allows Shapes '2', '3', & '4'
 			{
-				key: 'MTRL',
-				value: 'Aluminum',
+				key: 'PROFILE_MATERIAL',
+				value: 'ACRYLIC',
 				dependencies: [
 					{
 						type: 'include',
 						criteria: [
 							{
-								key: 'SHP',
-								values: ['One', 'Five', 'Ten'],
+								key: 'PROFILE_SHAPE',
+								values: ['2', '3', '4'],
 							},
 						],
 					},
 				],
 			},
-			// Material 'Wood' allows Font 'Arial'
+			// Material 'ALUMINUM' allows ONLY Shape '1'
 			{
-				key: 'MTRL',
-				value: 'Wood',
+				key: 'PROFILE_MATERIAL',
+				value: 'ALUMINUM',
 				dependencies: [
 					{
 						type: 'include',
 						criteria: [
 							{
-								key: 'FNT',
-								values: ['Arial'],
+								key: 'PROFILE_SHAPE',
+								values: ['1'],
 							},
 						],
 					},
 				],
 			},
-			// Material 'Concrete' allows all 'Shape' EXCEPT 'Ten'
+			// Material 'Concrete' allows all 'Shape' EXCEPT '4'
 			{
-				key: 'MTRL',
-				value: 'Concrete',
+				key: 'PROFILE_MATERIAL',
+				value: 'CONCRETE',
 				dependencies: [
 					{
 						type: 'exclude',
 						criteria: [
 							{
-								key: 'SHP',
-								values: ['Ten'],
+								key: 'PROFILE_SHAPE',
+								values: ['4'],
 							},
 						],
 					},
 				],
 			},
-			// Font 'Times New Roman' is only allowed on Aluminum One
+			// Shape '5' is only allowed with Material 'Wood'
 			{
-				key: 'FNT',
-				value: 'Times New Roman',
+				key: 'PROFILE_SHAPE',
+				value: '5',
 				dependencies: [
 					{
 						type: 'allowedIf',
 						criteria: [
-							{ key: 'MTRL', values: ['Aluminum'] },
-							{ key: 'SHP', values: ['One'] },
+							{
+								key: 'PROFILE_MATERIAL',
+								values: ['WOOD'],
+							},
 						],
 					},
 				],
