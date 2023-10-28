@@ -1,6 +1,6 @@
 export const getOptions = async () => {
 	let options = [];
-	await getClass().then((response) => {
+	await getClasses().then((response) => {
 		response.e1klahm.e1ksmlm.forEach((x) => {
 			options.push({ line: x.posnr, key: x.atnam });
 		});
@@ -34,7 +34,7 @@ export const getOptions = async () => {
 	return options.filter((c) => c.description);
 };
 
-export const getClass = async () => {
+export const getClasses = async () => {
 	return {
 		e1klahm: {
 			msgfn: '004',

@@ -65,6 +65,53 @@ export const getConfiguration = async () => {
 					},
 				],
 			},
+			// FAKE
+			{
+				key: 'PROTO_X',
+				value: 'FAKE',
+				dependencies: [
+					{
+						type: 'include',
+						criteria: [
+							{
+								key: 'PROTO_A',
+								values: ['1', '2', '3'],
+							},
+						],
+					},
+					{
+						type: 'exclude',
+						criteria: [
+							{
+								key: 'PROTO_B',
+								values: ['4', '5', '6'],
+							},
+						],
+					},
+					{
+						type: 'allowedIf',
+						criteria: [
+							{
+								key: 'PROTO_C',
+								values: ['7', '8', '9'],
+							},
+							{
+								key: 'PROTO_D',
+								values: ['7', '8', '9'],
+							},
+						],
+					},
+					{
+						type: '???',
+						criteria: [
+							{
+								key: 'PROTO_E',
+								values: ['10'],
+							},
+						],
+					},
+				],
+			},
 		],
 	};
 };
