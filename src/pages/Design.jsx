@@ -35,6 +35,7 @@ export default function Design() {
 		getConfiguration().then((response) => {
 			setConfig(response.configuration);
 		});
+		setVariantDraft(true);
 	}, []);
 
 	useEffect(() => {
@@ -62,7 +63,7 @@ export default function Design() {
 		setVariantDraft(false);
 		let configCopy = JSON.parse(JSON.stringify(config || []));
 		let optionsCopy = JSON.parse(JSON.stringify(defaultOptions || []));
-		let variantCopy = JSON.parse(JSON.stringify(variant || []));
+		let variantCopy = JSON.parse(JSON.stringify(variant || {}));
 
 		for (const key in variantCopy) {
 			let filteredConfig = configCopy.filter((item) => {
@@ -125,18 +126,23 @@ export default function Design() {
 					});
 
 					if (!allowed) {
-						let newValues = optionsCopy
-							.find((o) => o.key === c.key)
-							.allowedValues.filter(
+						let option = optionsCopy.find((o) => o.key === c.key);
+
+						if (option) {
+							let newValues = option.allowedValues.filter(
 								(allowedValue) => allowedValue.value !== c.value
 							);
-						optionsCopy.find((option) => {
-							return option.key === c.key;
-						}).allowedValues = newValues;
+
+							optionsCopy.find((option) => {
+								return option.key === c.key;
+							}).allowedValues = newValues;
+						}
 					}
 				}
 			});
 		});
+
+		// NEW: 'optionIf' rule
 
 		setFilteredOptions(optionsCopy);
 	};
