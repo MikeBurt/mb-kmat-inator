@@ -177,6 +177,7 @@ export default function NewConfigModal(props) {
 			{ value: 'include', label: 'Include' },
 			{ value: 'exclude', label: 'Exclude' },
 			{ value: 'allowedIf', label: 'Allow If' },
+			{ value: 'optionIf', label: 'Option If' },
 		];
 		let items = [];
 

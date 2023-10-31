@@ -139,10 +139,24 @@ export default function Design() {
 						}
 					}
 				}
+				if (d.type === 'optionIf') {
+					let allowed = true;
+					d.criteria.forEach((item) => {
+						allowed =
+							item.values.includes(variantCopy[item.key]) &&
+							allowed;
+					});
+					if (!allowed) {
+						let option = optionsCopy.find((o) => o.key === c.key);
+						if (option) {
+							optionsCopy = optionsCopy.filter(
+								(o) => o.key !== option.key
+							);
+						}
+					}
+				}
 			});
 		});
-
-		// NEW: 'optionIf' rule
 
 		setFilteredOptions(optionsCopy);
 	};

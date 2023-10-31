@@ -60,6 +60,7 @@ export default function Design() {
 					color = 'error';
 					break;
 				case 'allowedIf':
+				case 'optionIf':
 					color = 'warning';
 					break;
 				default:
