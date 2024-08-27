@@ -1,8 +1,9 @@
 export const getConfiguration = async () => {
 	return {
 		configuration: [
-			// Material 'ACRYLIC' allows Shapes '2', '3', & '4'
 			{
+				description:
+					'Material of `ACRYLIC` allows Shapes `SQUARE`, `HEART`, & `STAR`',
 				key: 'PROFILE_MATERIAL',
 				value: 'ACRYLIC',
 				dependencies: [
@@ -11,14 +12,15 @@ export const getConfiguration = async () => {
 						criteria: [
 							{
 								key: 'PROFILE_SHAPE',
-								values: ['2', '3', '4'],
+								values: ['SQUARE', 'HEART', 'STAR'],
 							},
 						],
 					},
 				],
 			},
-			// Material 'ALUMINUM' allows ONLY Shape '1'
 			{
+				description:
+					'Material of `ALUMINUM` allows ONLY Shape `CIRCLE`',
 				key: 'PROFILE_MATERIAL',
 				value: 'ALUMINUM',
 				dependencies: [
@@ -27,14 +29,15 @@ export const getConfiguration = async () => {
 						criteria: [
 							{
 								key: 'PROFILE_SHAPE',
-								values: ['1'],
+								values: ['CIRCLE'],
 							},
 						],
 					},
 				],
 			},
-			// Material 'Concrete' allows all 'Shape' EXCEPT '4'
 			{
+				description:
+					'Material of `CONCRETE` allows all Shapes EXCEPT `STAR`',
 				key: 'PROFILE_MATERIAL',
 				value: 'CONCRETE',
 				dependencies: [
@@ -43,16 +46,17 @@ export const getConfiguration = async () => {
 						criteria: [
 							{
 								key: 'PROFILE_SHAPE',
-								values: ['4'],
+								values: ['STAR'],
 							},
 						],
 					},
 				],
 			},
-			// Shape '5' is only allowed with Material 'Wood'
 			{
+				description:
+					'Shape of `HORSESHOE` is allowed ONLY when Material is `WOOD`',
 				key: 'PROFILE_SHAPE',
-				value: '5',
+				value: 'HORSESHOE',
 				dependencies: [
 					{
 						type: 'allowedIf',
@@ -65,8 +69,9 @@ export const getConfiguration = async () => {
 					},
 				],
 			},
-			// Wood Type is Only Available with Material 'Wood'
 			{
+				description:
+					'`Wood Type` Options are allowed ONLY when Material is `Wood`',
 				key: 'PROFILE_WOOD_TYPE',
 				value: '',
 				dependencies: [

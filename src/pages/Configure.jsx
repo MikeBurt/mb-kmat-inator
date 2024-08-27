@@ -40,14 +40,17 @@ export default function Design() {
 		}
 	};
 
-	const card = (data) => {
+	const card = (data, index) => {
 		let dependencies = data.dependencies.map((d, i) => {
 			let criteria = d.criteria.map((c, i) => {
 				let values = c.values.join(', ');
 				return (
-					<span key={i} style={{ marginRight: '20px' }}>
-						<i>{c.key}</i>: <b>{values}</b>
-					</span>
+					<>
+						<span key={i} style={{ marginRight: '20px' }}>
+							{d.description ? <i>{d.description}</i> : ''}
+							<i>{c.key}</i>: <b>{values}</b>
+						</span>
+					</>
 				);
 			});
 
@@ -80,7 +83,8 @@ export default function Design() {
 		});
 
 		return (
-			<Card key={data.key} style={{ marginBottom: '10px' }}>
+			<Card key={index} style={{ marginBottom: '10px' }}>
+				<p>{data.description ? <i>{data.description}</i> : ''}</p>
 				<CardContent>
 					<Grid container>
 						<Grid item xs={12} style={{ marginBottom: '10px' }}>
